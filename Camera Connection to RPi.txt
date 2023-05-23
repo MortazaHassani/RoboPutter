@@ -1,0 +1,12 @@
+sudo apt install fswebcam
+
+v4l2-ctl --list-formats-ext
+
+fswebcam -r 1280x720 --no-banner /images/image1.jpg
+
+sudo nano /boot/config.txt 
+
+# add below to end
+start_x=1
+
+then reboot

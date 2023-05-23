@@ -29,3 +29,6 @@ class HomogeneousBgDetector():
     # def get_objects_rect(self):
     #     box = cv2.boxPoints(rect)  # cv2.boxPoints(rect) for OpenCV 3.x
     #     box = np.int0(box)
+    
+    
+    

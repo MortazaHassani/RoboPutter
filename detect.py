@@ -11,7 +11,7 @@ import numpy as np
 
 aruco_mode = False
 # Load Image
-img = cv2.imread("top-golf3.jpg")
+img = cv2.imread("top-golf.jpg")
 # Get the image dimensions (height, width, channels)
 img_height, img_width, img_channels = img.shape
 
