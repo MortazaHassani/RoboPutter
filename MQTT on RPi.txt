@@ -1,0 +1,54 @@
+sudo apt update
+sudo apt upgrade
+sudo apt install mosquitto
+sudo apt install mosquitto-clients
+sudo systemctl start mosquitto
+sudo systemctl enable mosquitto
+mosquitto_sub -t test/topic
+mosquitto_pub -t test/topic -m "Hello, MQTT!"
+-----------------------------------------------------------
+AUTH--
+----------------------------------------------------------
+sudo mosquitto_passwd -c /etc/mosquitto/passwd YOUR_USERNAME
+sudo nano /etc/mosquitto/mosquitto.conf
+-->
+per_listener_settings true
+
+allow_anonymous false
+listener 1883
+password_file /etc/mosquitto/passwd
+-->>
+# Place your local configuration in /etc/mosquitto/conf.d/
+#
+# A full description of the configuration file is at
+# /usr/share/doc/mosquitto/examples/mosquitto.conf.example
+
+per_listener_settings true
+
+pid_file /run/mosquitto/mosquitto.pid
+
+persistence true
+persistence_location /var/lib/mosquitto/
+
+log_dest file /var/log/mosquitto/mosquitto.log
+
+include_dir /etc/mosquitto/conf.d
+allow_anonymous false 
+listener 1883  
+password_file /etc/mosquitto/passwd
+-->>
+-->
+=========================================
+To change user pass, if I want to change the password for the sara user and taking into account that the password file we created was called passwd, the command will be as follows:
+
+sudo mosquitto_passwd /etc/mosquitto/passwd sara
+--------------------------------------------------------------------------------------------
+mosquitto_sub -t nodemcu/control -u <username> -P <password>
+mosquitto_pub -t nodemcu/control -m "Hello, MQTT!" -u golf -P golf123
+--------------------------------------------------------------------------------------------
+mosquitto_pub -t nodemcu/control -m "ON" -u golf -P golf123
+mosquitto_pub -h 192.168.317.212 -p 1883 -u golf -P golf123 -t "golf/leds/pi" -m "ON"
+
+
+
+
