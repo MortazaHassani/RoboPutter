@@ -10,6 +10,7 @@
 #define MQTT_PASSWORD         "golf123" 
 #define LED_PIN     D1                // Pin connected to the LED. GPIO 2 (D4) 
 #define BUTTON_PIN  D2               // Pin connected to the button. GPIO 15 (D8) 
+
 /************ Global State ******************/ 
 // Create an ESP8266 WiFiClient class to connect to the MQTT server. 
 WiFiClient client; 

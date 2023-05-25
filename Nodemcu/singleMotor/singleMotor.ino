@@ -47,22 +47,22 @@ void loop() {
 }
 void forward(){
   Serial.println("Going forward");
-  analogWrite(ENA, 255);
+  analogWrite(ENA, 120);
   digitalWrite(IN1, HIGH);
   digitalWrite(IN2, LOW);
 
-  analogWrite(ENB, 255);
+  analogWrite(ENB, 120);
   digitalWrite(IN3, HIGH);
   digitalWrite(IN4, LOW);
 
 }
 void backward(){
   Serial.println("Going backward");
-  analogWrite(ENA, 255);
+  analogWrite(ENA, 120);
   digitalWrite(IN1, LOW);
   digitalWrite(IN2, HIGH);
 
-  analogWrite(ENB, 255);
+  analogWrite(ENB, 120);
   digitalWrite(IN3, LOW);
   digitalWrite(IN4, HIGH);
 
