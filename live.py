@@ -11,9 +11,11 @@ import numpy as np
 
 detectorHomo = HomogeneousBgDetector()
 aruco_mode = True
-
+arucoerror = False
+command = ''
 
 def aruco_detection(aruco_mode, img):
+    global arucoerror
     if aruco_mode:
         try:
             # Load Aruco detector
@@ -26,7 +28,13 @@ def aruco_detection(aruco_mode, img):
             
             # Get Aruco marker
             corners, markerIds, rejectedCandidates = detector.detectMarkers(img)
-            
+            #print("markerIds {} - corners: {}".format(markerIds, corners))
+            if (markerIds == 0):
+                print("forward")
+            elif (markerIds == 1):
+                print("backward")
+            else:
+                print("stop")
             # Draw polygon around the marker
             int_corners = np.int0(corners)
             cv2.polylines(img, int_corners, True, (0, 255, 0), 5)
@@ -36,8 +44,13 @@ def aruco_detection(aruco_mode, img):
             
             # Pixel to cm ratio
             pixel_cm_ratio = aruco_perimeter / 20
+            if (arucoerror):
+                arucoerror = False
+                print ("pixel_cm_ratio {}".format(pixel_cm_ratio))
         except:
-            print('unable to detect Aruco! set to default')
+            if (arucoerror != True):
+                arucoerror = True
+                print('unable to detect Aruco! set to default')
             pixel_cm_ratio = 29.52
     else:
         pixel_cm_ratio = 29.526773834228514

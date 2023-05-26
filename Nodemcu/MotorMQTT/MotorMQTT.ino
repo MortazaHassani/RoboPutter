@@ -76,9 +76,9 @@ void loop() {
      Serial.print(F("Got: ")); 
      Serial.println(message); 
      if (strcmp(message, "forward") == 0) {
-        forward();
+        forward(80);
       } else if (strcmp(message, "backward") == 0) {
-        backward();
+        backward(80);
       } else if (strcmp(message, "stop") == 0) {
         stop();
       }
@@ -143,24 +143,24 @@ void MQTT_connect() {
 // Here start L298N Motors Functions
 
 
-void forward(){
+void forward(int speed){
   Serial.println("Going forward");
-  analogWrite(ENA, 50);
+  analogWrite(ENA, speed);
   digitalWrite(IN1, HIGH);
   digitalWrite(IN2, LOW);
 
-  analogWrite(ENB, 50);
+  analogWrite(ENB, speed);
   digitalWrite(IN3, HIGH);
   digitalWrite(IN4, LOW);
 
 }
-void backward(){
+void backward(int speed){
   Serial.println("Going backward");
-  analogWrite(ENA, 50);
+  analogWrite(ENA, speed);
   digitalWrite(IN1, LOW);
   digitalWrite(IN2, HIGH);
 
-  analogWrite(ENB, 50);
+  analogWrite(ENB, speed);
   digitalWrite(IN3, LOW);
   digitalWrite(IN4, HIGH);
 
