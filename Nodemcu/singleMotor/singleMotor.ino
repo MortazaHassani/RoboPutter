@@ -5,9 +5,7 @@ int IN3 = 0;
 int IN4 = 2;
 int ENB = 15;
 
-void setup() {
-  Serial.begin(115200); 
-  Serial.println("Setup");
+void MotorFunc(){
   pinMode(ENA, OUTPUT);
   pinMode(IN1, OUTPUT);
   pinMode(IN2, OUTPUT); 
@@ -19,6 +17,12 @@ void setup() {
   pinMode(IN4, OUTPUT); 
   digitalWrite(IN3, LOW);
   digitalWrite(IN4, LOW);
+}
+
+void setup() {
+  Serial.begin(115200); 
+  Serial.println("Setup");
+  MotorFunc();
 }
 
 void loop() {

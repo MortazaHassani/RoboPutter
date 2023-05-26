@@ -1,36 +1,31 @@
 import cv2
 
+# Open the video capture
+cap = cv2.VideoCapture(0)  # Use 0 for the default camera
 
+# Set the desired resolution
+width = 1280
+height = 720
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
 
-# Open the webcam
+# Check if the resolution was set successfully
+actual_width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+actual_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+print("Actual Resolution: {} x {}".format(actual_width, actual_height))
 
-cap = cv2.VideoCapture(0)
-
-
+# Start capturing and displaying frames
 while True:
-
-    # Capture frame-by-frame
-
     ret, frame = cap.read()
-
-
-
-    # Display the resulting frame
-
-    cv2.imshow('Webcam', frame)
-
-
-
+    
+    # Perform any processing or display operations here
+    
+    cv2.imshow("Webcam", frame)
+    
     # Exit the loop if 'q' is pressed
-
     if cv2.waitKey(1) & 0xFF == ord('q'):
-
         break
 
-
-
-# Release the webcam and close the windows
-
+# Release the video capture and close any open windows
 cap.release()
-
 cv2.destroyAllWindows()
