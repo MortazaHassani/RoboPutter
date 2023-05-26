@@ -131,7 +131,9 @@ while True:
     
     
     cv2.imshow("Image", img)
-    client.publish_message(command)
+    
+    if (command != ''):
+        client.publish_message(command)
     
     
     # Exit code
