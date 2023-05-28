@@ -15,7 +15,7 @@ class HomogeneousBgDetector():
         # Find contours
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-        cv2.imshow("mask", mask)
+        #cv2.imshow("mask", mask)
         objects_contours = []
 
         for cnt in contours:
