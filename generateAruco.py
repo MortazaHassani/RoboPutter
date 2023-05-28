@@ -16,7 +16,7 @@ marker_size = 200
 # Generate the marker image
 marker_id = 23
 marker_image = np.zeros((marker_size, marker_size), dtype=np.uint8)
-marker = aruco.generateImageMarker(aruco_dict, marker_id, marker_size, marker_image, 1)
+marker = aruco.drawMarker(aruco_dict, marker_id, marker_size, marker_image, 1)
 
 # Save the marker image
 cv2.imwrite('marker23.png', marker)
