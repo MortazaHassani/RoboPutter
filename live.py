@@ -8,6 +8,7 @@ Created on Fri May 12 18:07:07 2023
 import cv2
 from object_detector import *
 import numpy as np
+import cv2.aruco as aruco #For RaspberryPi
 
 detectorHomo = HomogeneousBgDetector()
 aruco_mode = True
@@ -19,17 +20,20 @@ def aruco_detection(aruco_mode, img):
     if aruco_mode:
         try:
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            # Load Aruco detector
-            aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
-            parameters =  cv2.aruco.DetectorParameters()
-            detector = cv2.aruco.ArucoDetector(aruco_dict, parameters)
             
-            #parameters = cv2.aruco.DetectorParameters()
-            #aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_5X5_50)
-            
-            # Get Aruco marker
-            corners, markerIds, rejectedCandidates = detector.detectMarkers(gray)
+            ### For V 4.7.0 | PC
+            # aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
+            # parameters =  cv2.aruco.DetectorParameters()
+            # detector = cv2.aruco.ArucoDetector(aruco_dict, parameters)
+            # corners, markerIds, rejectedCandidates = detector.detectMarkers(gray)
             #print("markerIds {} - corners: {}".format(markerIds, corners))
+            
+            ### For v4.5.5 | Raspberry Pi
+            
+            aruco_dict = aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
+            parameters = aruco.DetectorParameters_create()
+            corners, markerIds, rejectedCandidates = aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
+            
             if (markerIds == 0):
                 print("forward")
             elif (markerIds == 1):

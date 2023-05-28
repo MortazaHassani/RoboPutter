@@ -10,11 +10,11 @@ import cv2.aruco as aruco
 import numpy as np
 
 # Define the dictionary and marker size
-aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_6X6_250)
+aruco_dict = aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
 marker_size = 200
 
 # Generate the marker image
-marker_id = 23
+marker_id = 0
 marker_image = np.zeros((marker_size, marker_size), dtype=np.uint8)
 marker = aruco.drawMarker(aruco_dict, marker_id, marker_size, marker_image, 1)
 
