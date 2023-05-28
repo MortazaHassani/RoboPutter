@@ -1,0 +1,17 @@
+sudo apt-get update
+sudo apt-get upgrade
+mkdir golf
+cd golf
+python3 -m venv vgolf
+git clone https://github.com/MortazaHassani/FYP_Golf-playing-robot.git
+source vgolf/bin/activate
+
+sudo apt install fswebcam
+sudo nano /boot/config.txt 
+	# add below to end
+	start_x=1
+
+sudo apt install snapd
+sudo snap install cmake --classic
+#After it below guidelines
+https://qengineering.eu/install-opencv-4.5-on-raspberry-pi-4.html
