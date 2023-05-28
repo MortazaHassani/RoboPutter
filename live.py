@@ -87,6 +87,10 @@ def contours_detection(contours, img):
 #-------------------------------------------------
 # Create a VideoCapture object and open the camera
 cap = cv2.VideoCapture(0)
+cam_width = 1280
+cam_height = 720
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, cam_width)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cam_height)
 
 if not cap.isOpened():
     print("Failed to open the camera")
