@@ -18,6 +18,7 @@ def aruco_detection(aruco_mode, img):
     global arucoerror
     if aruco_mode:
         try:
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             # Load Aruco detector
             aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
             parameters =  cv2.aruco.DetectorParameters()
@@ -27,7 +28,7 @@ def aruco_detection(aruco_mode, img):
             #aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_5X5_50)
             
             # Get Aruco marker
-            corners, markerIds, rejectedCandidates = detector.detectMarkers(img)
+            corners, markerIds, rejectedCandidates = detector.detectMarkers(gray)
             #print("markerIds {} - corners: {}".format(markerIds, corners))
             if (markerIds == 0):
                 print("forward")

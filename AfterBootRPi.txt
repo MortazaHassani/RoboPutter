@@ -13,5 +13,5 @@ sudo nano /boot/config.txt
 
 sudo apt install snapd
 sudo snap install cmake --classic
-#After it below guidelines
+#After it below guidelines for OPENCV2
 https://qengineering.eu/install-opencv-4.5-on-raspberry-pi-4.html

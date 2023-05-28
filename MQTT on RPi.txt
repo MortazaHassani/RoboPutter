@@ -52,4 +52,8 @@ mosquitto_pub -h 192.168.317.212 -p 1883 -u golf -P golf123 -t "golf/leds/pi" -m
 
 
 
+https://www.instructables.com/Raspberry-Pi-Talking-to-ESP8266-Using-MQTT/
+
+
+
 
