@@ -4,6 +4,7 @@ sudo apt install mosquitto
 sudo apt install mosquitto-clients
 sudo systemctl start mosquitto
 sudo systemctl enable mosquitto
+pip3 install paho-mqtt
 mosquitto_sub -t test/topic
 mosquitto_pub -t test/topic -m "Hello, MQTT!"
 -----------------------------------------------------------
