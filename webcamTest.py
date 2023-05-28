@@ -1,7 +1,7 @@
 import cv2
 
 # Open the video capture
-cap = cv2.VideoCapture(0)  # Use 0 for the default camera
+cap = cv2.VideoCapture(0, cv2.CAP_V4L2)  # Use 0 for the default camera
 
 # Set the desired resolution
 width = 1280
