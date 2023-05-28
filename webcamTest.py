@@ -8,11 +8,14 @@ width = 1280
 height = 720
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
+cap.set(cv2.CAP_PROP_FPS, 30)
+
 
 # Check if the resolution was set successfully
 actual_width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
 actual_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
-print("Actual Resolution: {} x {}".format(actual_width, actual_height))
+print("Actual Resolution: {} x {} & FPS: {}".format(actual_width, actual_height,cap.get(cv2.CAP_PROP_FPS)))
 
 # Start capturing and displaying frames
 while True:
