@@ -16,6 +16,7 @@ import cv2
 from object_detector import *
 import numpy as np
 from MQTTClientFYP import MQTTClientFYP
+import cv2.aruco as aruco #For RaspberryPi
 
 detectorHomo = HomogeneousBgDetector()
 aruco_mode = True
@@ -26,17 +27,21 @@ def aruco_detection(aruco_mode, img):
     global arucoerror
     if aruco_mode:
         try:
-            # Load Aruco detector
-            aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
-            parameters =  cv2.aruco.DetectorParameters()
-            detector = cv2.aruco.ArucoDetector(aruco_dict, parameters)
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             
-            #parameters = cv2.aruco.DetectorParameters()
-            #aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_5X5_50)
-            
-            # Get Aruco marker
-            corners, markerIds, rejectedCandidates = detector.detectMarkers(img)
+            ### For V 4.7.0 | PC
+            # aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
+            # parameters =  cv2.aruco.DetectorParameters()
+            # detector = cv2.aruco.ArucoDetector(aruco_dict, parameters)
+            # corners, markerIds, rejectedCandidates = detector.detectMarkers(gray)
             #print("markerIds {} - corners: {}".format(markerIds, corners))
+            
+            ### For v4.5.5 | Raspberry Pi
+            
+            aruco_dict = aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
+            parameters = aruco.DetectorParameters_create()
+            corners, markerIds, rejectedCandidates = aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
+            
             if (markerIds == 0):
                 print("forward")
             elif (markerIds == 1):
@@ -95,6 +100,11 @@ def contours_detection(contours, img):
 #-------------------------------------------------
 # Create a VideoCapture object and open the camera
 cap = cv2.VideoCapture(0)
+cam_width = 1280
+cam_height = 720
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, cam_width)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cam_height)
+
 
 if not cap.isOpened():
     print("Failed to open the camera")
