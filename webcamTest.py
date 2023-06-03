@@ -6,14 +6,14 @@ with open('setting.json') as jfile:
     
 
 # Open the video capture
-cap = cv2.VideoCapture(0)  # Use 0 for the default camera
+cap = cv2.VideoCapture(0, cv2.CAP_V4L2)  # Use 0 for the default camera
 
 # Set the desired resolution
 width = setting['camera']['width']
 height = setting['camera']['height']
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-# cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
+cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
 cap.set(cv2.CAP_PROP_FPS, setting['camera']['FPS'])
 
 
