@@ -1,21 +1,24 @@
 import cv2
+import json
+
+with open('setting.json') as jfile:
+    setting =json.load(jfile)
+    
 
 # Open the video capture
-cap = cv2.VideoCapture(0, cv2.CAP_V4L2)  # Use 0 for the default camera
+cap = cv2.VideoCapture(0)  # Use 0 for the default camera
 
 # Set the desired resolution
-width = 1280
-height = 720
+width = setting['camera']['width']
+height = setting['camera']['height']
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
-cap.set(cv2.CAP_PROP_FPS, 30)
+# cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
+cap.set(cv2.CAP_PROP_FPS, setting['camera']['FPS'])
 
 
 # Check if the resolution was set successfully
-actual_width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
-actual_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
-print("Actual Resolution: {} x {} & FPS: {}".format(actual_width, actual_height,cap.get(cv2.CAP_PROP_FPS)))
+print("Actual Resolution: {} x {} & FPS: {}".format(cap.get(cv2.CAP_PROP_FRAME_WIDTH), cap.get(cv2.CAP_PROP_FRAME_HEIGHT),cap.get(cv2.CAP_PROP_FPS)))
 
 # Start capturing and displaying frames
 while True:
