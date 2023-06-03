@@ -5,7 +5,7 @@
 /************************* WiFi Access Point *********************************/ 
 #define WLAN_SSID       "Board_Wlan" 
 #define WLAN_PASS       "Board_Wlan**$7" 
-#define MQTT_SERVER      "192.168.137.212" // static ip address
+#define MQTT_SERVER      "192.168.137.4" // static ip address
 #define MQTT_PORT         1883                    
 #define MQTT_USERNAME    "golf" 
 #define MQTT_PASSWORD         "golf123" 

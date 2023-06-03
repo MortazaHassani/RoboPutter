@@ -29,6 +29,7 @@ command = ''
 
 def aruco_detection(aruco_mode, img):
     global arucoerror
+    global command
     if aruco_mode:
         try:
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -47,11 +48,14 @@ def aruco_detection(aruco_mode, img):
             corners, markerIds, rejectedCandidates = aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
             
             if (markerIds == 0):
-                print("forward")
+                command = "forward"
+                #print("forward")
             elif (markerIds == 1):
-                print("backward")
+                command = "backward"
+                #print("backward")
             else:
-                print("stop")
+                command = "stop"
+                #print("stop")
             # Draw polygon around the marker
             int_corners = np.int0(corners)
             cv2.polylines(img, int_corners, True, (0, 255, 0), 5)
@@ -152,6 +156,7 @@ while True:
     cv2.imshow("Image", img)
     
     if (command != ''):
+        print("sending: ", command)
         client.publish_message(command)
     
     
