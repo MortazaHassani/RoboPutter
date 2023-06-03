@@ -1,8 +1,14 @@
 {
-    "camera": {
-            "width" : 1280,
-            "height" : 720,
-            "FPS" : 30
-                }
-
+  "camera": {
+    "width": 1280,
+    "height": 720,
+    "FPS": 30
+  },
+  "broker": {
+    "broker_address": "192.168.137.4",
+    "broker_port": 1883,
+    "topic": "golf/esp8266",
+    "username": "golf",
+    "password": "golf123"
+  }
 }

@@ -1,12 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri May 26 21:40:00 2023
-
-@author: Reymond
-"""
-
-# -*- coding: utf-8 -*-
-"""
 Created on Fri May 12 18:07:07 2023
 
 @author: Reymond
@@ -125,17 +118,15 @@ if not cap.isOpened():
 
 # Example usage:
 client = MQTTClientFYP(
-    broker_address="192.168.137.4",
-    broker_port=1883,
-    topic="golf/leds/esp8266",
-    username="golf",
-    password="golf123"
+    broker_address=setting['broker']['broker_address'],
+    broker_port=setting['broker']['broker_port'],
+    topic=setting['broker']['topic'],
+    username=setting['broker']['username'],
+    password=setting['broker']['password']
 )
 client.start()
 
-    
 
-client.stop()
 while True:
     # Read a frame from the camera
     ret, img = cap.read()
@@ -145,10 +136,8 @@ while True:
         break
 #-------------------------------------------------
 
-
     #---------------------------- Stream
     pixel_cm_ratio = aruco_detection(aruco_mode, img)
-    #print("pixel_cm_ratio:",pixel_cm_ratio)
     contours = detectorHomo.detect_objects(img)
     objects_center = contours_detection(contours, img)
     
@@ -168,3 +157,4 @@ while True:
 # Release the VideoCapture and close the window
 cap.release()
 cv2.destroyAllWindows()
+client.stop()
