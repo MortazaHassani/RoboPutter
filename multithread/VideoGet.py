@@ -1,4 +1,5 @@
 from threading import Thread
+# from multiprocessing import Process
 import cv2
 
 class VideoGet:
@@ -14,6 +15,7 @@ class VideoGet:
 
     def start(self):    
         Thread(target=self.get, args=()).start()
+        # Process(target=self.get, args=()).start()
         return self
 
     def get(self):

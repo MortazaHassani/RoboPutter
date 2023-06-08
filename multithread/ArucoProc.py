@@ -1,4 +1,5 @@
 from threading import Thread
+# from multiprocessing import Process
 import cv2
 import numpy as np
 
@@ -25,6 +26,7 @@ class ArucoProc:
 
     def start(self):
         Thread(target=self.detect, args=()).start()
+        # Process(target=self.detect, args=()).start()
         return self
 
     def detect(self):

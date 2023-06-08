@@ -10,5 +10,10 @@
     "topic": "golf/esp8266",
     "username": "golf",
     "password": "golf123"
+  },
+  "Aruco":{
+    "aruco_mode": true,
+    "pixel_cm_ratio": 30
+
   }
 }

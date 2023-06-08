@@ -11,6 +11,7 @@ import numpy as np
 from MQTTClientFYP import MQTTClientFYP
 import cv2.aruco as aruco #For RaspberryPi
 import json
+import platform
 
 with open('setting.json') as jfile:
     setting =json.load(jfile)
@@ -100,15 +101,18 @@ def contours_detection(contours, img):
 
 #-------------------------------------------------
 # Create a VideoCapture object and open the camera
-cap = cv2.VideoCapture(0, cv2.CAP_V4L2)  # Use 0 for the default camera
+if (platform.system()=='Windows'):
+    cap = cv2.VideoCapture(0)
+else:
+    cap = cv2.VideoCapture(0, cv2.CAP_V4L2)  # Use 0 for the default camera
 
-# Set the desired resolution
-width = setting['camera']['width']
-height = setting['camera']['height']
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
-cap.set(cv2.CAP_PROP_FPS, setting['camera']['FPS'])
+    # Set the desired resolution
+    width = setting['camera']['width']
+    height = setting['camera']['height']
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+    cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
+    cap.set(cv2.CAP_PROP_FPS, setting['camera']['FPS'])
 # Check if the resolution was set successfully
 print("Actual Resolution: {} x {} & FPS: {}".format(cap.get(cv2.CAP_PROP_FRAME_WIDTH), cap.get(cv2.CAP_PROP_FRAME_HEIGHT),cap.get(cv2.CAP_PROP_FPS)))
 

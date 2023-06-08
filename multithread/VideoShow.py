@@ -1,4 +1,5 @@
 from threading import Thread
+# from multiprocessing import Process
 import cv2
 
 class VideoShow:
@@ -13,6 +14,7 @@ class VideoShow:
 
     def start(self):
         Thread(target=self.show, args=()).start()
+        # Process(target=self.show, args=()).start()
         return self
 
     def show(self):
