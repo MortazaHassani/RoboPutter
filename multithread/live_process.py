@@ -127,7 +127,7 @@ def convert_to_grayscale(input, flag):
 
 if __name__ == '__main__':
     # Create a multiprocessing Queue to share frames between processes
-    frame_queue = mp.Queue()
+    frame_queue = mp.Queue(maxsize=5)
 
     # img queue
     image_queue = mp.Queue(maxsize=10)
