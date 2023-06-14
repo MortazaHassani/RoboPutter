@@ -14,8 +14,8 @@ aruco_mode = setting['Aruco']['aruco_mode']
 arucoerror = False
 command = ''
 
-def aruco_detection(gray):
-    global arucoerror    
+def aruco_detection(gray, setting):
+    global arucoerror  
     try:     
         ### For V 4.7.0 | PC
         if (cv2.__version__=='4.7.0'):
@@ -30,22 +30,15 @@ def aruco_detection(gray):
             aruco_dict = aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
             parameters = aruco.DetectorParameters_create()
             corners, markerIds, rejectedCandidates = aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
-        # Draw polygon around the marker
         int_corners = np.int0(corners)
         #cv2.polylines(img, int_corners, True, (0, 255, 0), 5)
-        
-        # Aruco Perimeter
+
         aruco_perimeter = cv2.arcLength(corners[0], True)
-        
-        # Pixel to cm ratio
-        pixel_cm_ratio = aruco_perimeter / 20
-        if (arucoerror):
-            arucoerror = False
-            print ("pixel_cm_ratio {}".format(pixel_cm_ratio))
+
+        pixel_cm_ratio = aruco_perimeter / setting['Aruco']['marker_size']
+        print ("pixel_cm_ratio {}".format(pixel_cm_ratio))
+        setting['Aruco']['pixel_cm_ratio'] = pixel_cm_ratio
     except:
-        if (arucoerror != True):
-            arucoerror = True
-            print('unable to detect Aruco! set to default')
         pixel_cm_ratio = setting['Aruco']['pixel_cm_ratio']
     
     return pixel_cm_ratio, int_corners
@@ -78,7 +71,7 @@ def read_frames(output, image_queue, flag, initial_frames):
     if (platform.system()=='Windows'):
         cap = cv2.VideoCapture(0)
     else:
-        cap = cv2.VideoCapture(0, cv2.CAP_V4L2)  # Use 0 for the default camera
+        cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
 
         # Set the desired resolution
         width = setting['camera']['width']
@@ -104,14 +97,14 @@ def read_frames(output, image_queue, flag, initial_frames):
     cap.release()
 
 # Function to convert frames to grayscale and display them
-def convert_to_grayscale(input, flag):
+def convert_to_grayscale(input, flag, setting):
     cv2.namedWindow("Grayscale", cv2.WINDOW_NORMAL)
     cv2.resizeWindow("Grayscale", 640, 480)
     while True:
         frame = input.get()
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         if aruco_mode:
-            pixel_cm_ratio, maker_corner = aruco_detection(gray)
+            pixel_cm_ratio, maker_corner = aruco_detection(gray, setting)
         else:
             pixel_cm_ratio = setting['Aruco']['pixel_cm_ratio']
         cv2.polylines(frame, maker_corner, True, (0, 255, 0), 5)
@@ -124,6 +117,9 @@ def convert_to_grayscale(input, flag):
     while not input.empty():
         _ = input.get()
     cv2.destroyAllWindows()
+    # update setting
+    with open('setting.json', 'w') as ujfile:
+        json.dump(setting, ujfile)
 
 if __name__ == '__main__':
     # Create a multiprocessing Queue to share frames between processes
@@ -131,6 +127,7 @@ if __name__ == '__main__':
 
     # img queue
     image_queue = mp.Queue(maxsize=10)
+
     initial_frames = mp.Value('i', 1)
     # Create a multiprocessing Value to share the flag variable
     flag = mp.Value('i', 1)  # 1 means the program should continue running
@@ -139,8 +136,7 @@ if __name__ == '__main__':
     frame_process = mp.Process(target=read_frames, args=(frame_queue, image_queue, flag, initial_frames))
     frame_process.daemon = True
     frame_process.start()
-
-    grayscale_process = mp.Process(target=convert_to_grayscale, args=(frame_queue, flag))
+    grayscale_process = mp.Process(target=convert_to_grayscale, args=(frame_queue, flag, setting))
     grayscale_process.start()
 
     # Wait for the user to terminate the program
@@ -148,10 +144,12 @@ if __name__ == '__main__':
     flag.value = 0
     # frame_process.join()
 
-    while not image_queue.empty():
-        frame = image_queue.get()
-        cv2.imshow("Frame", frame)
-        cv2.waitKey(1000)  # Wait for 2 seconds
-    cv2.destroyAllWindows()
+    
+
+    # while not image_queue.empty():
+    #     frame = image_queue.get()
+    #     cv2.imshow("Frame", frame)
+    #     cv2.waitKey(1000)  # Wait for 2 seconds
+    # cv2.destroyAllWindows()
 
     sys.exit()  # Terminate the program
