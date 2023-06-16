@@ -6,7 +6,9 @@ import platform
 import multiprocessing as mp
 import sys
 
-with open('setting.json') as jfile:
+
+json_location = 'setting.json'
+with open(json_location) as jfile:
     setting =json.load(jfile)
     
 
@@ -23,7 +25,6 @@ def aruco_detection(gray, setting):
             parameters =  cv2.aruco.DetectorParameters()
             detector = cv2.aruco.ArucoDetector(aruco_dict, parameters)
             corners, markerIds, rejectedCandidates = detector.detectMarkers(gray)
-            #print("markerIds {} - corners: {}".format(markerIds, corners))
         else:
             ### For v4.5.5 | Raspberry Pi
             
@@ -31,31 +32,32 @@ def aruco_detection(gray, setting):
             parameters = aruco.DetectorParameters_create()
             corners, markerIds, rejectedCandidates = aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
         int_corners = np.int0(corners)
-        #cv2.polylines(img, int_corners, True, (0, 255, 0), 5)
+        # print("markerIds {} - corners: {}".format(markerIds, corners))
+        # cv2.polylines(img, int_corners, True, (0, 255, 0), 5)
 
         aruco_perimeter = cv2.arcLength(corners[0], True)
 
         pixel_cm_ratio = aruco_perimeter / setting['Aruco']['marker_size']
-        print ("pixel_cm_ratio {}".format(pixel_cm_ratio))
+        # print ("pixel_cm_ratio {}".format(pixel_cm_ratio))
         setting['Aruco']['pixel_cm_ratio'] = pixel_cm_ratio
     except:
         pixel_cm_ratio = setting['Aruco']['pixel_cm_ratio']
     
     return pixel_cm_ratio, int_corners
 
-def detect_circle(gray,img):
-    # Create a list to store the circles
-    circle_list = []
-    circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, dp=1, minDist=20, param1=40, param2=40, minRadius=10, maxRadius=50)
-    # Draw circles on the original image and add to the list
-    if circles is not None:
-        circles = np.round(circles[0, :]).astype("int")
-        for (x, y, r) in circles:
-            cv2.circle(img, (x, y), r, (0, 255, 0), 2)
-            circle_list.append((x, y, r))
-        # Sort the circles by their size (radius)
-        circle_list = sorted(circle_list, key=lambda x: x[2])
-    return circle_list
+def detect_circle(gray):
+        # Create a list to store the circles
+        circle_list = []
+        circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, dp=1, minDist=20, param1=40, param2=40, minRadius=10, maxRadius=50)
+        # Draw circles on the original image and add to the list
+        if circles is not None:
+            circles = np.round(circles[0, :]).astype("int")
+            for (x, y, r) in circles:
+                #cv2.circle(img, (x, y), r, (0, 255, 0), 2)
+                circle_list.append((x, y, r))
+            # Sort the circles by their size (radius)
+            circle_list = sorted(circle_list, key=lambda x: x[2])
+        return circle_list
 
 def gaussian_filter(gray):
         # Apply Gaussian blur filter with kernel size 5x5 and sigma value of 0
@@ -118,19 +120,39 @@ def convert_to_grayscale(input, flag, setting):
         _ = input.get()
     cv2.destroyAllWindows()
     # update setting
-    with open('setting.json', 'w') as ujfile:
+    with open(json_location, 'w') as ujfile:
         json.dump(setting, ujfile)
 
+
+def algo(input_frame, phase):
+    cv2.namedWindow("MainAlgo", cv2.WINDOW_NORMAL)
+    cv2.resizeWindow("MainAlgo", 640, 480)
+    circle_lists = []
+    while True:
+        frame = input_frame.get()
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        if (phase==1):
+            circle_lists.append(detect_circle(gray))
+        cv2.imshow("MainAlgo", frame)
+        if cv2.waitKey(1) & 0xFF == ord('q') or flag.value == 0:
+            flag.value = 0
+            break
+    while not input.empty():
+        _ = input.get()
+    cv2.destroyAllWindows()
+    # update setting
+    with open(json_location, 'w') as ujfile:
+        json.dump(setting, ujfile)
+    
 if __name__ == '__main__':
     # Create a multiprocessing Queue to share frames between processes
-    frame_queue = mp.Queue(maxsize=5)
-
-    # img queue
+    frame_queue = mp.Queue(maxsize=10)
     image_queue = mp.Queue(maxsize=10)
 
     initial_frames = mp.Value('i', 1)
     # Create a multiprocessing Value to share the flag variable
     flag = mp.Value('i', 1)  # 1 means the program should continue running
+    detect_flag = mp.Value('i', 0)
 
     # Create the processes
     frame_process = mp.Process(target=read_frames, args=(frame_queue, image_queue, flag, initial_frames))
