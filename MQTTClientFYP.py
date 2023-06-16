@@ -34,7 +34,7 @@ class MQTTClientFYP:
 
     def on_message(self, client, userdata, msg):
         message = msg.payload.decode("utf-8")
-        print("Received message: " + message)
+        # print("Received message: " + message)
         # Perform actions based on the received message
         # if message == "on":
         #     print("Turning on NodeMCU-controlled device")

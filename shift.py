@@ -104,7 +104,7 @@ def aruco_detection(gray, setting):
             parameters = aruco.DetectorParameters_create()
             corners, markerIds, rejectedCandidates = aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
         int_corners = np.int0(corners)
-        cv2.polylines(img, int_corners, True, (0, 255, 0), 5)
+        # cv2.polylines(img, int_corners, True, (0, 255, 0), 5)
 
         aruco_perimeter = cv2.arcLength(corners[0], True)
         pixel_cm_ratio = aruco_perimeter / setting['Aruco']['marker_size']
@@ -196,7 +196,7 @@ def algo(input, flag, setting, command_d):
 
             pixel_cm_ratio , corners = aruco_detection(gray, setting)
             command_d['forward']= 10
-            # cv2.polylines(frame, corners, True, (0, 255, 0), 2)
+            cv2.polylines(frame, corners, True, (0, 255, 0), 2)
 
         cv2.imshow("MainAlgo", frame)
         if cv2.waitKey(1) & 0xFF == ord('q') or flag.value == 0:
