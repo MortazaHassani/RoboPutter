@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import cv2.aruco as aruco #For RaspberryPi
+from MQTTClientFYP import MQTTClientFYP
 import json
 import platform
 import multiprocessing as mp
@@ -45,6 +46,24 @@ def get_ip(setting):
         pass
 
 
+def command_car(flag, setting, command_d):
+    client = MQTTClientFYP(
+    broker_address=setting['broker']['broker_address'],
+    broker_port=setting['broker']['broker_port'],
+    topic=setting['broker']['topic'],
+    username=setting['broker']['username'],
+    password=setting['broker']['password']
+    )
+    client.start()
+    print('MQTT initialized', flush=True)
+    while flag.value == 1: # 1 means active
+        if len(command_d) != 0:
+            cmd_dict = dict(command_d)
+            message = json.dumps(cmd_dict)
+            client.publish_message(message)
+    client.stop()
+
+
 def random_generate():
     x = random.randint(11,17)
     y = random.randint(11,17)
@@ -85,7 +104,7 @@ def aruco_detection(gray, setting):
             parameters = aruco.DetectorParameters_create()
             corners, markerIds, rejectedCandidates = aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
         int_corners = np.int0(corners)
-        # cv2.polylines(img, int_corners, True, (0, 255, 0), 5)
+        cv2.polylines(img, int_corners, True, (0, 255, 0), 5)
 
         aruco_perimeter = cv2.arcLength(corners[0], True)
         pixel_cm_ratio = aruco_perimeter / setting['Aruco']['marker_size']
@@ -125,18 +144,16 @@ def draw_direction(frame, circle_locations, setting):
     delta_x = (line_length ) * np.sin(angle)
     delta_y = -(line_length ) * np.cos(angle)
 
-    x1 = int(extended_point[0] - delta_x )
-    x2 = int(extended_point[0] + delta_x )
-    y1 = int(extended_point[1] - delta_y )
-    y2 = int(extended_point[1] + delta_y )
+    p1_ = (int(extended_point[0] - delta_x ), int(extended_point[1] - delta_y ))
+    p2_ = (int(extended_point[0] + delta_x ), int(extended_point[1] + delta_y ))
 
     
-    cv2.line(frame, (x1 , y1), (x2 , y2), (120, 0, 100), thickness=2)
+    cv2.arrowedLine(frame, p1_, p2_, (120, 0, 100), thickness=2)
     
     # Add the distance text to the frame
     text_pos = ((circle_locations[1][0] + circle_locations[0][0])//2, (circle_locations[1][1] + circle_locations[0][1])//2)
     cv2.putText(frame, f"{distance} cm {angle * (180 / math.pi)}\' ", text_pos, cv2.FONT_HERSHEY_SIMPLEX, 1, (100, 10, 0), 2)
-    
+    return p1_, p2_
 
 def read_frames(output, flag):
     if (platform.system()=='Windows'):
@@ -163,7 +180,7 @@ def read_frames(output, flag):
     cap.release()
 
 
-def algo(input, flag, setting):
+def algo(input, flag, setting, command_d):
     cv2.namedWindow("MainAlgo", cv2.WINDOW_NORMAL)
     cv2.resizeWindow("MainAlgo", 640, 480)
     circle_locations = []
@@ -178,7 +195,8 @@ def algo(input, flag, setting):
             draw_direction(frame,circle_locations,setting)
 
             pixel_cm_ratio , corners = aruco_detection(gray, setting)
-            cv2.polylines(frame, corners, True, (0, 255, 0), 1)
+            command_d['forward']= 10
+            # cv2.polylines(frame, corners, True, (0, 255, 0), 2)
 
         cv2.imshow("MainAlgo", frame)
         if cv2.waitKey(1) & 0xFF == ord('q') or flag.value == 0:
@@ -195,6 +213,9 @@ if __name__ == '__main__':
     frame_queue = mp.Queue(maxsize=10)
     # Create a multiprocessing Value to share the flag variable
     flag = mp.Value('i', 1)
+    # Shared dictionary 
+    manager = mp.Manager()
+    command_dict = manager.dict()
 
     # initialize processes
     prepare_process = mp.Process(target=get_ip, args=(setting, ))
@@ -205,7 +226,13 @@ if __name__ == '__main__':
     frame_process.daemon = True
     frame_process.start()
 
-    algo_process = mp.Process(target=algo, args=(frame_queue, flag, setting))
+    algo_process = mp.Process(target=algo, args=(frame_queue, flag, setting, command_dict))
     algo_process.start()
+
+    mqtt_process = mp.Process(target=command_car, args=(flag, setting, command_dict))
+    mqtt_process.start()
+
     algo_process.join()
+    
+
     flag.value = 0
