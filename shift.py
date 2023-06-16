@@ -8,7 +8,7 @@ import sys
 import random
 import socket
 import netifaces
-
+import math
 
 json_location = 'setting.json'
 with open(json_location) as jfile:
@@ -63,7 +63,6 @@ def detect_circle(gray,img):
     # Draw circles on the original image and add to the list
     if circles is not None:
         circles = np.round(circles[0, :]).astype("int")
-        chosen = None
         for (x, y, r) in circles:
             cv2.circle(img, (x, y), r, (0, 255, 0), 2)
             circle_list.append((x, y, r))
@@ -98,6 +97,47 @@ def aruco_detection(gray, setting):
     return pixel_cm_ratio, int_corners
 
 
+def draw_circle(frame, circle_locations,setting):
+    for circle in circle_locations:
+        x, y, r = circle
+        cv2.circle(frame, (x, y), r, (255, 10, 25), 2)
+        cv2.circle(frame, (x, y), 2, (0, 10, 255), 2)
+        cv2.putText(frame, " {} cm".format(round((r/setting['Aruco']['pixel_cm_ratio'])*2, 1)), (int(x - 50), int(y - 5)), cv2.FONT_HERSHEY_PLAIN, 1, (100, 200, 0), 1)
+
+def draw_direction(frame, circle_locations, setting):
+    # Calculate the distance between the circles in centimeters
+    dx, dy = circle_locations[1][0] - circle_locations[0][0], circle_locations[1][1] - circle_locations[0][1]
+    length = np.sqrt(dx**2 + dy**2)
+    distance = round(length / setting['Aruco']['pixel_cm_ratio'], 1) # delta
+    unit_dx, unit_dy = dx / length, dy / length
+    offset = setting['Aruco']['pixel_cm_ratio'] * setting['car']['offset_distance']
+    extended_point = (int(circle_locations[0][0] - offset * unit_dx), int(circle_locations[0][1] - offset * unit_dy))
+    # Draw a line from the smaller circle to the larger circle
+    cv2.arrowedLine(frame, (circle_locations[0][0], circle_locations[0][1]), (circle_locations[1][0], circle_locations[1][1]), (0, 255, 0), thickness=2)
+  
+    # Calculate the angle between the two circles in radians
+    angle = np.arctan2(circle_locations[0][1] - circle_locations[1][1], circle_locations[0][0] - circle_locations[1][0])
+
+
+    # Draw a line behind the smaller circle perpendicular to the line from smaller to larger circle
+    line_length = circle_locations[0][2] * 2
+    
+    delta_x = (line_length ) * np.sin(angle)
+    delta_y = -(line_length ) * np.cos(angle)
+
+    x1 = int(extended_point[0] - delta_x )
+    x2 = int(extended_point[0] + delta_x )
+    y1 = int(extended_point[1] - delta_y )
+    y2 = int(extended_point[1] + delta_y )
+
+    
+    cv2.line(frame, (x1 , y1), (x2 , y2), (120, 0, 100), thickness=2)
+    
+    # Add the distance text to the frame
+    text_pos = ((circle_locations[1][0] + circle_locations[0][0])//2, (circle_locations[1][1] + circle_locations[0][1])//2)
+    cv2.putText(frame, f"{distance} cm {angle * (180 / math.pi)}\' ", text_pos, cv2.FONT_HERSHEY_SIMPLEX, 1, (100, 10, 0), 2)
+    
+
 def read_frames(output, flag):
     if (platform.system()=='Windows'):
         cap = cv2.VideoCapture(0)
@@ -125,7 +165,7 @@ def read_frames(output, flag):
 
 def algo(input, flag, setting):
     cv2.namedWindow("MainAlgo", cv2.WINDOW_NORMAL)
-    cv2.resizeWindow("MainAlgo", 1280, 720)
+    cv2.resizeWindow("MainAlgo", 640, 480)
     circle_locations = []
     while True:
         frame = input.get()
@@ -134,11 +174,11 @@ def algo(input, flag, setting):
         if (len(circle_locations)!=2):
             circle_locations = detect_circle(gray,frame)
         else:
-            cv2.circle(frame, (circle_locations[0][0], circle_locations[0][1]), circle_locations[0][2], (0, 10, 255), 2)
-            cv2.circle(frame, (circle_locations[1][0], circle_locations[1][1]), circle_locations[1][2], (0, 10, 255), 2)
+            draw_circle(frame,circle_locations,setting)
+            draw_direction(frame,circle_locations,setting)
 
             pixel_cm_ratio , corners = aruco_detection(gray, setting)
-            cv2.polylines(frame, corners, True, (0, 255, 0), 5)
+            cv2.polylines(frame, corners, True, (0, 255, 0), 1)
 
         cv2.imshow("MainAlgo", frame)
         if cv2.waitKey(1) & 0xFF == ord('q') or flag.value == 0:

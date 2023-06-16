@@ -58,6 +58,7 @@ objects_center = []
 for cnt in contours:
     # Get rect
     rect = cv2.minAreaRect(cnt)
+    print(rect)
     (x, y), (w, h), angle = rect
 
     # Get Width and Height of the Objects by applying the Ratio pixel to cm
