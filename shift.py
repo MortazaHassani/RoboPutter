@@ -129,7 +129,7 @@ def draw_direction(frame, circle_locations, setting):
     length = np.sqrt(dx**2 + dy**2)
     distance = round(length / setting['Aruco']['pixel_cm_ratio'], 1) # delta
     unit_dx, unit_dy = dx / length, dy / length
-    offset = setting['Aruco']['pixel_cm_ratio'] * setting['car']['offset_distance']
+    offset = (setting['Aruco']['pixel_cm_ratio'] * setting['car']['offset_distance']) + circle_locations[0][2]
     extended_point = (int(circle_locations[0][0] - offset * unit_dx), int(circle_locations[0][1] - offset * unit_dy))
     # Draw a line from the smaller circle to the larger circle
     cv2.arrowedLine(frame, (circle_locations[0][0], circle_locations[0][1]), (circle_locations[1][0], circle_locations[1][1]), (0, 255, 0), thickness=2)
