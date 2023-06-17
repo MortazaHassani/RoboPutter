@@ -47,21 +47,25 @@ def get_ip(setting):
 
 
 def command_car(flag, setting, command_d):
-    client = MQTTClientFYP(
-    broker_address=setting['broker']['broker_address'],
-    broker_port=setting['broker']['broker_port'],
-    topic=setting['broker']['topic'],
-    username=setting['broker']['username'],
-    password=setting['broker']['password']
-    )
-    client.start()
-    print('MQTT initialized', flush=True)
-    while flag.value == 1: # 1 means active
-        if len(command_d) != 0:
-            cmd_dict = dict(command_d)
-            message = json.dumps(cmd_dict)
-            client.publish_message(message)
-    client.stop()
+    try:        
+        client = MQTTClientFYP(
+        broker_address=setting['broker']['broker_address'],
+        broker_port=setting['broker']['broker_port'],
+        topic=setting['broker']['topic'],
+        username=setting['broker']['username'],
+        password=setting['broker']['password']
+        )
+
+        client.start()
+        print('MQTT initialized', flush=True)
+        while flag.value == 1: # 1 means active
+            if len(command_d) != 0:
+                cmd_dict = dict(command_d)
+                message = json.dumps(cmd_dict)
+                client.publish_message(message)
+        client.stop()
+    except Exception as e:
+        print(f'MQTT connection issue: {e}', flush=True)
 
 
 def random_generate():
@@ -89,7 +93,9 @@ def detect_circle(gray,img):
         circle_list = sorted(circle_list, key=lambda x: x[2])
     return circle_list
 
+
 def aruco_detection(gray, setting):
+    int_corners = None
     try:     
         ### For V 4.7.0 | PC
         if (cv2.__version__=='4.7.0'):
@@ -103,13 +109,16 @@ def aruco_detection(gray, setting):
             aruco_dict = aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
             parameters = aruco.DetectorParameters_create()
             corners, markerIds, rejectedCandidates = aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
-        int_corners = np.int0(corners)
-        # cv2.polylines(img, int_corners, True, (0, 255, 0), 5)
+        if np.any(markerIds == 1):
+            int_corners = np.int0(corners)
+            # cv2.polylines(img, int_corners, True, (0, 255, 0), 5)
 
-        aruco_perimeter = cv2.arcLength(corners[0], True)
-        pixel_cm_ratio = aruco_perimeter / setting['Aruco']['marker_size']
-        # print ("pixel_cm_ratio {}".format(pixel_cm_ratio))
-        setting['Aruco']['pixel_cm_ratio'] = pixel_cm_ratio
+            aruco_perimeter = cv2.arcLength(corners[0], True)
+            pixel_cm_ratio = aruco_perimeter / setting['Aruco']['marker_size']
+            # print ("pixel_cm_ratio {}".format(pixel_cm_ratio))
+            setting['Aruco']['pixel_cm_ratio'] = pixel_cm_ratio
+        else:
+            pixel_cm_ratio = setting['Aruco']['pixel_cm_ratio']
     except:
         pixel_cm_ratio = setting['Aruco']['pixel_cm_ratio']
     
@@ -155,6 +164,12 @@ def draw_direction(frame, circle_locations, setting):
     cv2.putText(frame, f"{distance} cm {angle * (180 / math.pi)}\' ", text_pos, cv2.FONT_HERSHEY_SIMPLEX, 1, (100, 10, 0), 2)
     return p1_, p2_
 
+
+def deviance(c_dict,setting,p1_i, p2_i,p1_car,p2_car):
+    dev_margin = (setting['car']['error_margin'] / 10) * setting['Aruco']['pixel_cm_ratio']
+    # 
+    
+    
 def read_frames(output, flag):
     if (platform.system()=='Windows'):
         cap = cv2.VideoCapture(0)
@@ -192,11 +207,15 @@ def algo(input, flag, setting, command_d):
             circle_locations = detect_circle(gray,frame)
         else:
             draw_circle(frame,circle_locations,setting)
-            draw_direction(frame,circle_locations,setting)
+            p_start, p_end = draw_direction(frame,circle_locations,setting)
 
             pixel_cm_ratio , corners = aruco_detection(gray, setting)
-            command_d['forward']= 10
-            cv2.polylines(frame, corners, True, (0, 255, 0), 2)
+            if corners is not None and corners.size > 0:
+                command_d['forward']= 10
+                cv2.polylines(frame, corners, True, (0, 255, 0), 2)
+                top_left = corners[0, 0, 0, :] 
+                top_right = corners[0, 0, 1, :]
+                cv2.arrowedLine(frame, tuple(top_left), tuple(top_right), (120, 0, 35), thickness=2)
 
         cv2.imshow("MainAlgo", frame)
         if cv2.waitKey(1) & 0xFF == ord('q') or flag.value == 0:
