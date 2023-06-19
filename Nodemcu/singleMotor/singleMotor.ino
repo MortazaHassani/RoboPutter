@@ -1,3 +1,7 @@
+#include <Servo.h>
+
+Servo myservo;
+int servo = D2;
 int ENA = 14;
 int IN1 = 12;
 int IN2 = 13;
@@ -25,6 +29,7 @@ void MotorFunc(){
 void setup() {
   Serial.begin(115200); 
   Serial.println("Setup");
+  myservo.attach(servo, 500, 2500);
   MotorFunc();
 }
 
@@ -53,6 +58,9 @@ void loop() {
   else if(teststr == "right"){
     right(time_sec);
   }
+  else if(teststr == "kick"){
+    kick(time_sec);
+  }
   else {
     stop();
   }
@@ -60,6 +68,14 @@ void loop() {
   delay(1000);
   */
 }
+
+void kick(float time_sec){
+  int pos = time_sec;
+  Serial.println("Kick");
+  myservo.write(pos);
+  delay(2000);
+}
+
 void forward(float time_sec){
   Serial.println("Going forward");
   unsigned long start_time = millis();

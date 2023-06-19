@@ -9,8 +9,8 @@
 #define MQTT_PORT         1883                    
 #define MQTT_USERNAME    "golf" 
 #define MQTT_PASSWORD         "golf123" 
-#define LED_PIN     D1                // Pin connected to the LED. GPIO 2 (D4) 
-#define BUTTON_PIN  D2               // Pin connected to the button. GPIO 15 (D8) 
+
+
 int ENA = 14;
 int IN1 = 12;
 int IN2 = 13;
