@@ -9,9 +9,9 @@
   },
   "Aruco": {
     "aruco_mode": true,
-    "pixel_cm_ratio": 63.20802001953125,
+    "pixel_cm_ratio": 8.497615814208984,
     "marker_size": 10
   },
   "MQTT": { "pi_ip": "192.168.137.4" },
-  "car": { "offset_distance": 1, "error_margin": 1 }
+  "car": { "offset_distance": 1, "error_margin": 1, "degree_change": 3 }
 }

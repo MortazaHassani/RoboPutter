@@ -4,6 +4,8 @@ import socket
 import netifaces
 import sys
 from MQTTClientFYP import MQTTClientFYP
+import keyboard
+import time
 
 
 json_location = 'setting.json'
@@ -38,6 +40,34 @@ def get_ip(setting):
     except:
         pass
 
+def forward(degree_c = setting['car']['degree_change']):
+  return "forward " + str(degree_c)
+
+def backward(degree_c = setting['car']['degree_change']):
+  return "backward " + str(degree_c)
+
+def left(degree_c = setting['car']['degree_change']):
+  return "left " + str(degree_c)
+
+def right(degree_c = setting['car']['degree_change']):
+  return "right " + str(degree_c)
+
+def kick(kick_degree=180):
+    return "kick " + str(kick_degree)
+def zero_kick(kick_degree=0):
+    return "kick " + str(kick_degree)
+
+arrow_keys = {
+  "up": forward,
+  "down": backward,
+  "left": left,
+  "right": right,
+  "k": kick,
+  "z":zero_kick
+
+}
+
+
 def command_car(setting, command_d):
     try:        
         client = MQTTClientFYP(
@@ -50,11 +80,28 @@ def command_car(setting, command_d):
 
         client.start()
         print('MQTT initialized', flush=True)
-        while (command_d != 0 or command_d != "0"): 
-            command_d = input("Enter Command: ")
-            if len(command_d) != 0:
-                client.publish_message(command_d)
+
+        while True:
+            event = keyboard.read_event()
+            if event.event_type == keyboard.KEY_DOWN:
+                # print(event.name)
+                if event.name == "esc":
+                    break
+                try:
+                    command_d = arrow_keys[event.name]()
+                    client.publish_message(command_d)
+                    # print(command_d)
+                except:
+                    print('wrong key')
+                
+                
         client.stop()
+
+        # while (command_d != 0 or command_d != "0"): 
+        #     command_d = input("Enter Command: ")
+        #     if len(command_d) != 0:
+        #         client.publish_message(command_d)
+        # client.stop()
     except Exception as e:
         print(f'MQTT connection issue: {e}', flush=True)
 

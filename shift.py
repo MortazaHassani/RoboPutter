@@ -38,12 +38,30 @@ def get_ip(setting):
         if wireless_interface is not None:
             ip_address = netifaces.ifaddresses(wireless_interface)[netifaces.AF_INET][0]['addr']
             print("IP address:", ip_address)
-            setting['MQTT']['pi_ip'] = ip_address
+            setting['broker']['broker_address'] = ip_address
             update_setting(setting)
         else:
             print("Wireless interface not found")
     except:
         pass
+
+
+def forward(degree_c = setting['car']['degree_change']):
+  return "forward " + str(degree_c)
+
+def backward(degree_c = setting['car']['degree_change']):
+  return "backward " + str(degree_c)
+
+def left(degree_c = setting['car']['degree_change']):
+  return "left " + str(degree_c)
+
+def right(degree_c = setting['car']['degree_change']):
+  return "right " + str(degree_c)
+
+def kick(kick_degree=180):
+    return "kick " + str(kick_degree)
+def zero_kick(kick_degree=0):
+    return "kick " + str(kick_degree)
 
 
 def command_car(flag, setting, command_d):
@@ -59,11 +77,14 @@ def command_car(flag, setting, command_d):
         client.start()
         print('MQTT initialized', flush=True)
         while flag.value == 1: # 1 means active
-            if len(command_d) != 0:
-                cmd_dict = dict(command_d)
-                message = json.dumps(cmd_dict)
+            if not command_d.empty():
+                cmd_dict = command_d.get()
+                message = cmd_dict['dir']
                 client.publish_message(message)
+                print(f'MQTT msg: {message}', flush=True)
         client.stop()
+        while not command_d.empty():
+                _ = command_d.get()
     except Exception as e:
         print(f'MQTT connection issue: {e}', flush=True)
 
@@ -116,7 +137,7 @@ def aruco_detection(gray, setting):
             aruco_perimeter = cv2.arcLength(corners[0], True)
             pixel_cm_ratio = aruco_perimeter / setting['Aruco']['marker_size']
             # print ("pixel_cm_ratio {}".format(pixel_cm_ratio))
-            setting['Aruco']['pixel_cm_ratio'] = pixel_cm_ratio
+            setting['Aruco']['pixel_cm_ratio'] = pixel_cm_ratio / 4
         else:
             pixel_cm_ratio = setting['Aruco']['pixel_cm_ratio']
     except:
@@ -148,7 +169,7 @@ def draw_direction(frame, circle_locations, setting):
 
 
     # Draw a line behind the smaller circle perpendicular to the line from smaller to larger circle
-    line_length = circle_locations[0][2] * 2
+    line_length = setting['Aruco']['pixel_cm_ratio'] * setting['Aruco']['marker_size'] / 2
     
     delta_x = (line_length ) * np.sin(angle)
     delta_y = -(line_length ) * np.cos(angle)
@@ -165,10 +186,21 @@ def draw_direction(frame, circle_locations, setting):
     return p1_, p2_
 
 
-def deviance(c_dict,setting,p1_i, p2_i,p1_car,p2_car):
+def drive(c_dir,setting,p1_i, p2_i,p1_car,p2_car):
     dev_margin = (setting['car']['error_margin'] / 10) * setting['Aruco']['pixel_cm_ratio']
-    # 
-    
+
+    # go left up
+    if (p1_i[0] >p1_car[0] or p2_i[0] > p2_car[0]):
+        if (abs(p2_car[1] - p1_car[1])>dev_margin):
+            if (p1_car[1]> p2_car):
+                c_dir.put("left 5")
+            else:
+                c_dir.put("right 5")
+        else:
+            c_dir.put("forward 5")   
+    # c_dir.put("forward 10")
+
+
     
 def read_frames(output, flag):
     if (platform.system()=='Windows'):
@@ -211,11 +243,11 @@ def algo(input, flag, setting, command_d):
 
             pixel_cm_ratio , corners = aruco_detection(gray, setting)
             if corners is not None and corners.size > 0:
-                command_d['forward']= 10
                 cv2.polylines(frame, corners, True, (0, 255, 0), 2)
-                top_left = corners[0, 0, 0, :] 
-                top_right = corners[0, 0, 1, :]
-                cv2.arrowedLine(frame, tuple(top_left), tuple(top_right), (120, 0, 35), thickness=2)
+                p_scar= corners[0, 0, 0, :] 
+                p_ecar = corners[0, 0, 1, :]
+                cv2.arrowedLine(frame, tuple(p_scar), tuple(p_ecar), (120, 0, 35), thickness=2)
+                # drive(command_d, setting, p_start, p_end,p_scar, p_ecar )
 
         cv2.imshow("MainAlgo", frame)
         if cv2.waitKey(1) & 0xFF == ord('q') or flag.value == 0:
@@ -234,7 +266,7 @@ if __name__ == '__main__':
     flag = mp.Value('i', 1)
     # Shared dictionary 
     manager = mp.Manager()
-    command_dict = manager.dict()
+    command_dict = mp.Queue(maxsize=10)
 
     # initialize processes
     prepare_process = mp.Process(target=get_ip, args=(setting, ))

@@ -18,6 +18,7 @@ int IN2 = 13;
 int IN3 = 0;
 int IN4 = 2;
 int ENB = 15;
+int LED = D0;
 /************************* Environment Constants *********************************/ 
 int carSpeed = 100;
 int multiP = 10;
@@ -51,6 +52,7 @@ void MotorFunc(){
 void setup() {
   Serial.begin(115200); 
   Serial.println("ESP8266 ON");
+  pinMode(LED, OUTPUT);
   myservo.attach(servo, 500, 2500);
   MotorFunc();
   delay(30);
@@ -131,7 +133,7 @@ void MQTT_connect() {
       Serial.println(mqtt.connectErrorString(ret)); 
       Serial.println("Retrying MQTT connection in 5 seconds..."); 
       mqtt.disconnect(); 
-      // digitalWrite(LED_PIN, LOW); 
+      digitalWrite(LED, LOW); 
       delay(3000);  // wait 3 seconds 
       retries--; 
       if (retries == 0) { 
@@ -141,7 +143,7 @@ void MQTT_connect() {
  } 
  if ((ret = mqtt.connect()) == 0){
  Serial.println("MQTT Connected!");
-//  digitalWrite(LED_PIN, HIGH); 
+ digitalWrite(LED, HIGH); 
  } 
 } 
 
