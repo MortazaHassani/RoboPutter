@@ -1,17 +1,1 @@
-{
-  "camera": { "width": 640, "height": 480, "FPS": 10 },
-  "broker": {
-    "broker_address": "192.168.137.4",
-    "broker_port": 1883,
-    "topic": "golf/esp8266",
-    "username": "golf",
-    "password": "golf123"
-  },
-  "Aruco": {
-    "aruco_mode": true,
-    "pixel_cm_ratio": 8.497615814208984,
-    "marker_size": 10
-  },
-  "MQTT": { "pi_ip": "192.168.137.4" },
-  "car": { "offset_distance": 1, "error_margin": 1, "degree_change": 3 }
-}
+{"camera": {"width": 640, "height": 480, "FPS": 10}, "broker": {"broker_address": "192.168.137.4", "broker_port": 1883, "topic": "golf/esp8266", "username": "golf", "password": "golf123"}, "Aruco": {"aruco_mode": true, "pixel_cm_ratio": 4.913769817352295, "marker_size": 10}, "MQTT": {"pi_ip": "192.168.137.4"}, "car": {"offset_distance": 1, "error_margin": 1, "degree_change": 3}}

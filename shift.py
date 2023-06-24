@@ -103,7 +103,7 @@ def detect_circle(gray,img):
     blurframe = cv2.GaussianBlur(gray, random_generate(), 0)
     # Create a list to store the circles
     circle_list = []
-    circles = cv2.HoughCircles(blurframe, cv2.HOUGH_GRADIENT, dp=1, minDist=20, param1=40, param2=40, minRadius=10, maxRadius=50)
+    circles = cv2.HoughCircles(blurframe, cv2.HOUGH_GRADIENT, dp=1, minDist=10, param1=40, param2=40, minRadius=5, maxRadius=50)
     # Draw circles on the original image and add to the list
     if circles is not None:
         circles = np.round(circles[0, :]).astype("int")
@@ -197,14 +197,22 @@ def drive(c_dir,setting,p1_i, p2_i,p1_car,p2_car):
             else:
                 c_dir.put("right 5")
         else:
-            c_dir.put("forward 5")   
+            c_dir.put("forward 5")
+    if (p1_i[0] <p1_car[0] or p2_i[0] < p2_car[0]):
+        if (abs(p2_car[1] - p1_car[1])>dev_margin):
+            if (p1_car[1]< p2_car):
+                c_dir.put("right 5")
+            else:
+                c_dir.put("left 5")
+        else:
+            c_dir.put("backward 5")   
     # c_dir.put("forward 10")
 
 
     
 def read_frames(output, flag):
     if (platform.system()=='Windows'):
-        cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture(1)
     else:
         cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
         width = setting['camera']['width']

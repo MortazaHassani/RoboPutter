@@ -20,7 +20,7 @@ int IN4 = 2;
 int ENB = 15;
 int LED = D0;
 /************************* Environment Constants *********************************/ 
-int carSpeed = 100;
+int carSpeed = 150;
 int multiP = 10;
 uint32_t x=0; 
 /************ Global State ******************/ 

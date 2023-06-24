@@ -10,7 +10,7 @@ import numpy as np
 from MQTTClientFYP import MQTTClientFYP
 import cv2.aruco as aruco #For RaspberryPi
 import json
-
+import platform
 with open('setting.json') as jfile:
     setting =json.load(jfile)
     
@@ -61,7 +61,7 @@ def gaussian_filter(gray):
         # Apply non-local means denoising with h=10 and search window size=21x21
         gray_denoised = cv2.fastNlMeansDenoising(gray_blur, None, h=10, searchWindowSize=21)
 
-        return gray_denoised
+        return gray_blur
 def detect_circle(gray,img):
     # Create a list to store the circles
     circle_list = []
@@ -76,13 +76,21 @@ def detect_circle(gray,img):
         circle_list = sorted(circle_list, key=lambda x: x[2])
     return circle_list
 
-def draw_objects(img,int_corners,circles):
-    cv2.polylines(img, int_corners, True, (0, 255, 0), 5)
+def draw_objects(img,circles):
     for i, (x, y, r) in enumerate(circles):
         cv2.circle(img, (x, y), r, (0, 255, 0), 2)
 def pro_camera():
     # Load Camera 
-    cap = cv2.VideoCapture(0)
+    if (platform.system()=='Windows'):
+        cap = cv2.VideoCapture(0)
+    else:
+        cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
+        width = setting['camera']['width']
+        height = setting['camera']['height']
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+        cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
+        cap.set(cv2.CAP_PROP_FPS, setting['camera']['FPS'])
     if not cap.isOpened():
         print("Failed to open the camera")
         exit()
@@ -95,15 +103,10 @@ def pro_camera():
             break
         # Convert to grayscale
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        if aruco_mode:
-            pixel_cm_ratio, maker_corner = aruco_detection(img)
-        else:
-            pixel_cm_ratio = 29.526773834228514
         gfi = gaussian_filter(gray)
         circle_list = detect_circle(gfi, img)    
-        print(maker_corner)
 
-        draw_objects(img,maker_corner,circle_list)
+        draw_objects(img,circle_list)
         cv2.imshow("Image", img)
         # Exit code
         key = cv2.waitKey(1) & 0xFF
